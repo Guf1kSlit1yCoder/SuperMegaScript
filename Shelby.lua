@@ -15,7 +15,8 @@ local AnimSpeed = 0.5
 _G.ShelbyConfig = {
     Aimbot = false, AimSens = 0.15, FovRadius = 150,
     EspSkeletons = false, EspHealth = false, EspNames = false,
-    Speed = false, WalkSpeed = 100
+    Speed = false, WalkSpeed = 100,
+    Bhop = false -- Новая функция
 }
 
 -- Очистка
@@ -107,7 +108,10 @@ local function Tab(n)
 end
 
 -- СОЗДАНИЕ КОНТЕНТА
-CreateToggle(CreatePage("Main"), "SPEED HACK", "Speed")
+local MainPage = CreatePage("Main")
+CreateToggle(MainPage, "SPEED HACK", "Speed")
+CreateToggle(MainPage, "BHOP (HOLD SPACE)", "Bhop") -- Твой бонихоп
+
 CreateToggle(CreatePage("Combat"), "SOFT AIMBOT", "Aimbot")
 CreateToggle(CreatePage("Visuals"), "HIGHLIGHT ESP", "EspSkeletons")
 CreateToggle(Pages["Visuals"], "SHOW NAMES", "EspNames")
@@ -116,6 +120,10 @@ Tab("Main"); Tab("Combat"); Tab("Visuals"); Tab("Settings")
 
 -- [ЛОГИКА ФУНКЦИЙ]
 RunService.RenderStepped:Connect(function()
+    local Character = LocalPlayer.Character
+    local Humanoid = Character and Character:FindFirstChild("Humanoid")
+
+    -- Aimbot
     if _G.ShelbyConfig.Aimbot then
         local target = nil; local shortestDist = _G.ShelbyConfig.FovRadius
         for _, p in pairs(Players:GetPlayers()) do
@@ -129,7 +137,20 @@ RunService.RenderStepped:Connect(function()
         end
         if target then Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, target.Character.Head.Position), _G.ShelbyConfig.AimSens) end
     end
-    if _G.ShelbyConfig.Speed and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.WalkSpeed = _G.ShelbyConfig.WalkSpeed end
+
+    -- Speed Hack
+    if _G.ShelbyConfig.Speed and Humanoid then 
+        Humanoid.WalkSpeed = _G.ShelbyConfig.WalkSpeed 
+    end
+
+    -- BHOP Logic
+    if _G.ShelbyConfig.Bhop and Humanoid then
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            if Character:FindFirstChild("HumanoidRootPart") and Humanoid.FloorMaterial ~= Enum.Material.Air then
+                Humanoid.Jump = true
+            end
+        end
+    end
 end)
 
 -- [УЛУЧШЕННЫЙ ESP]
